@@ -1,48 +1,129 @@
-# AzViz
+# ⚡ Azure Visualizer, aka 'AzViz' 
 
-PowerShell Module that can generate a topology diagram to Visualize Azure Network Topology and ARM templates (WIP). It has capabilities to insert appropriate Azure Icons depending upon the type of the Azure Resource you have in your Resource Group, like Virtual Machine, Virtual Network, Subnet etc.
+[![PowerShell Gallery][psgallery-version-badge]][psgallery] [![PowerShell Gallery][psgallery-badge]][psgallery] [![GitHub issues][github-issues-badge]][github-issues] [![CI][github-action-ci-badge]][github-action-ci] [![Documentation Status][docs-badge]][docs] [![License][license-badge]][license]
+
+[psgallery-version-badge]: https://img.shields.io/powershellgallery/v/AzViz.svg
+[docs-badge]: https://readthedocs.org/projects/azviz/badge/?version=latest
+[docs]: http://AzViz.readthedocs.io/en/latest/
+[psgallery-badge]: https://img.shields.io/powershellgallery/dt/AzViz.svg
+[psgallery]: https://www.powershellgallery.com/packages/AzViz
+[license-badge]: https://img.shields.io/github/license/PrateekKumarSingh/AzViz.svg
+[license]: https://www.powershellgallery.com/packages/AzViz
+[github-issues-badge]: https://img.shields.io/github/issues/PrateekKumarSingh/AzViz.svg
+[github-issues]: https://github.com/PrateekKumarSingh/AzViz/issues
+[github-action-ci-badge]: https://github.com/PrateekKumarSingh/AzViz/actions/workflows/main.yml/badge.svg
+[github-action-ci]: https://github.com/PrateekKumarSingh/AzViz/actions/workflows/main.yml
+
+Azure Visualizer aka 'AzViz' - PowerShell module to automatically generate Azure resource topology diagrams by just typing a PowerShell cmdlet and passing the name of one or more Azure Resource Group(s).
+
+> _Cloud admins are not anymore doomed to manually document a cloud environment! The pain of inheriting an undocumented cloud landscape to support is gone 😎😉 so please share this project with your colleagues and friends._
+
+<a href="https://www.buymeacoffee.com/prateeksingh" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
+It is capable of:
+ * Finding Resources in a Azure Resource Group and identifying their dependencies.
+ * Plot nodes and edges to represent Azure Resources and their dependencies on a graph.
+ * Insert appropriate Azure Icons on basis of resource category/sub-category.
+ * Label each resource with information like Name, Category, Type etc.
+ * Generate visualization in formats like: .png and .svg
+ * Output image can be in 'light', 'dark' or 'neon' theme.
+ * Can target more than one resource group at once.
+ * Change direction in which resource groups are plotted, i.e, left-to-right or top-to-bottom.
+ 
+![](https://github.com/PrateekKumarSingh/AzViz/blob/master/img/LabelVerbosity.png)
+
+## Demo Video - Youtube
+
+[![Demo Video](https://img.youtube.com/vi/7rsNGJ-QmEA/0.jpg)](https://www.youtube.com/watch?v=7rsNGJ-QmEA)
+
+## Prerequisite
+
+We need to install GraphViz on our system before we can proceed with using the 'AzViz' PowerShell module. Depending upon the operating system you are using please follow the below mentioned steps:
+### Linux
 
 
-# Azure Resource Network Topology Visualization
+```bash
+# Ubuntu
+$ sudo apt install graphviz
 
-### Working with Single Azure Resource Group
+# Fedora
+$ sudo yum install graphviz
 
-```PowerShell
-Import-Module AzViz
-
-Get-AzNetworkVizualization -ResourceGroups 'test-resource-group' -ShowGraph -OutputFormat png -Verbose
+# Debian
+$ sudo apt install graphviz
 ```
 
-![](https://github.com/PrateekKumarSingh/AzViz/blob/master/img/SingleResourceGroup.jpg)
-
-
-### Working with Multiple Azure Resource Group
+### Windows
 
 ```PowerShell
-$ResourceGroups = 'test-resource-group', 'demo-resource-group'
-Get-AzNetworkVizualization -ResourceGroups $ResourceGroups  -ShowGraph -OutputFormat png -Verbose
+# chocolatey packages Graphviz for Windows
+choco install graphviz
+
+# alternatively using windows package manager
+winget install graphviz
 ```
 
-![](https://github.com/PrateekKumarSingh/AzViz/blob/master/img/MultipleResourceGroups.jpg)
+### Mac
 
+```PowerShell
+brew install graphviz
+```
 
+## Installation 
+### From PowerShell Gallery
 
+```PowerShell
+# install from powershell gallery
+Install-Module AzViz -Verbose -Scope CurrentUser -Force
 
+# import the module
+Import-Module AzViz -Verbose
 
-# Does this looks like Network Watcher -> Monitor -> Topology feature? 
+# login to azure, this is required for module to work
+Connect-AzAccount
+```
 
-A couple of things... but before I begin, even this module uses Azure Network Watcher to get associations between each Azure resource, which is returned as a JSON text from Get-AzNetworkWatcherTopology, so following are some advantages this will offer -
+### Clone the project from GitHub
 
-1. Network Watcher Topology feature can be used at one resource Group at a time, and it is manual steps. While this module can work on multiple resource groups at once and create a topology diagram for all the resource groups in the entire Azure subscription.
+```PowerShell
+# optionally clone the project from github
+git clone https://github.com/PrateekKumarSingh/AzViz.git
+Set-Location .\AzViz\
+   
+# import the powershell module
+Import-Module .\AzViz.psm1 -Verbose
 
-2. Since it is written in PowerShell it becomes easy to generate automated diagrams and reports, to avoid manual activity. This means it can be incorporated with existing reports and scripts.
+# login to azure, this is required for module to work
+Connect-AzAccount
+```
 
-3. Since each Graph node is an Azure Resource, you can perform a Get-AzResource cmdlet to query more information, which will add more verbosity to graph-like, VMs can show IPAddress and OS with the node icon apart from just name.. I'll be adding this feature very soon.. The Topology Diagram doesn't have this feature it only shows the name of the Azure Resource, a very vanilla diagram.
+## How to use?
 
-4. You will also get the option to choose Node Ranking and Node grouping with module very soon.. that means you can place certain nodes on the same level in the graph and even group them into subgroups to make visual tiers like 'Front-end', 'Back-end' , 'tier1','tier2' etc.
+### Target Single Resource Group
 
-5. My understanding tells me, that Azure Network topology Diagrams only have Azure Resource Associations, but they don't show 'Containment' relationship like NIC is contained in a VM or something like that, this graph can also show that.
+```PowerShell
+# target single resource group
+Export-AzViz -ResourceGroup demo-2 -Theme light -Verbose -OutputFormat png -Show
+```
+![](https://github.com/PrateekKumarSingh/AzViz/blob/master/img/SingleResourceGroup.png)
+### Target Single Resource Group with more sub-categories
 
-6. It will also provide a single module to visualize existing network topology and ARM templates.
+```PowerShell
+# target single resource group with more sub-categories
+Export-AzViz -ResourceGroup demo-2 -Theme light -Verbose -OutputFormat png -Show -CategoryDepth 2
+```
+![](https://github.com/PrateekKumarSingh/AzViz/blob/master/img/SingleResourceGroupSubCategories.png)
+### Target Multiple Resource Groups
 
-I'm sure I would be able to implement more features, like colors, shapes, styles, fonts in coming time... and a lot of other functionalities like generating graphs in different output formats that can be even used in HTML webpages.. still a lot of work to do, and like I said in the post Module is still in very premature state. stay tuned.
+```PowerShell
+# target multiple resource groups
+Export-AzViz -ResourceGroup demo-2, demo-3 -LabelVerbosity 1 -CategoryDepth 1 -Theme light -Verbose -Show -OutputFormat png
+```
+![](https://github.com/PrateekKumarSingh/AzViz/blob/master/img/MultipleResourceGroups.png)
+### Add Verbosity to Resource Label
+
+```PowerShell
+# adding more information in resource label like: Name, type, Provider etc
+Export-AzViz -ResourceGroup demo-2 -Theme light -Verbose -OutputFormat png -Show -LabelVerbosity 2
+```
+![](https://github.com/PrateekKumarSingh/AzViz/blob/master/img/LabelVerbosity.png)
